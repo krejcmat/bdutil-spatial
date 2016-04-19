@@ -5,7 +5,39 @@
 
 
 
-#Hive SerDe schema generator
+
+#Notes
+##SerDe
+SerDe from version Hive 1.2 is included in hcatalog core
+```
+add jar ${env:HIVE_HOME}/hcatalog/share/hcatalog/hcatalog-core-0.12.0.jar;
+```
+```
+CREATE EXTERNAL TABLE links1 (
+type string,
+properties map<string,string>,
+geometry string
+)ROW FORMAT SERDE 'org.apache.hcatalog.data.JsonSerDe'
+STORED AS TEXTFILE;
+```
+!! SerDe from hcatalog doesn`t work properly with GeoJson. Hcatalog serde not allows to parse array in array structures as string which can be usefeful for conversion to geom datatype(for Esri Spatial Framework)
+```
+#GeoJson
+{ "geometry": { "type": "LineString", "coordinates": [ [ 15.7912, 50.2392 ], [ 15.7451, 50.23 ] ] } }
+#
+select ST_GeomFromGeoJSON(geometry) from links1;
+```
+
+Solution is to use [SerDe](https://github.com/rcongiu/Hive-JSON-Serde) .
+Compiling SerDe for Google Cloud must be with CDH4 mvn profile
+```
+sudo apt-get install -y maven openjdk-7-jdk git  && \
+git clone https://github.com/rcongiu/Hive-JSON-Serde.git && \
+cd Hive-JSON-Serde && \
+mvn -Pcdh4 clean package
+```
+
+##Hive SerDe schema generator
 1)[install scala](http://www.scala-sbt.org/download.html)
 
 2)Clone repository with generator
@@ -39,37 +71,5 @@ CREATE TABLE data (
 
 LOAD DATA LOCAL INPATH 'test.json' INTO TABLE data;
 ```
-
-#Notes
-##SerDe
-SerDe from version Hive 1.2 is included in hcatalog core
-```
-add jar ${env:HIVE_HOME}/hcatalog/share/hcatalog/hcatalog-core-0.12.0.jar;
-```
-```
-CREATE EXTERNAL TABLE links1 (
-type string,
-properties map<string,string>,
-geometry string
-)ROW FORMAT SERDE 'org.apache.hcatalog.data.JsonSerDe'
-STORED AS TEXTFILE;
-```
-!! SerDe from hcatalog doesn`t work properly with GeoJson. Hcatalog serde not allows to parse array in array structures as string which can be usefeful for conversion to geom datatype(for Esri Spatial Framework)
-```
-#GeoJson
-{ "geometry": { "type": "LineString", "coordinates": [ [ 15.7912, 50.2392 ], [ 15.7451, 50.23 ] ] } }
-#
-select ST_GeomFromGeoJSON(geometry) from links1;
-```
-
-Solution is to use [SerDe](https://github.com/rcongiu/Hive-JSON-Serde) .
-Compiling SerDe for Google Cloud must be with CDH4 mvn profile
-```
-sudo apt-get install -y maven openjdk-7-jdk git  && \
-git clone https://github.com/rcongiu/Hive-JSON-Serde.git && \
-cd Hive-JSON-Serde && \
-mvn -Pcdh4 clean package
-```
-
 
 
