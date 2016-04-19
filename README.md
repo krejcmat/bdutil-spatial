@@ -1,6 +1,10 @@
 # bdutil-spatial
  Google Cloud Platform: Dataproc - deployment of Hadoop cluster with several spatial frameworks
 
+
+
+
+
 #Hive SerDe schema generator
 1)[install scala](http://www.scala-sbt.org/download.html)
 
@@ -50,4 +54,22 @@ geometry string
 )ROW FORMAT SERDE 'org.apache.hcatalog.data.JsonSerDe'
 STORED AS TEXTFILE;
 ```
+!! SerDe from hcatalog doesn`t work properly with GeoJson. Hcatalog serde not allows to parse array in array structures as string which can be usefeful for conversion to geom datatype(for Esri Spatial Framework)
+```
+#GeoJson
+{ "geometry": { "type": "LineString", "coordinates": [ [ 15.7912, 50.2392 ], [ 15.7451, 50.23 ] ] } }
+#
+select ST_GeomFromGeoJSON(geometry) from links1;
+```
+
+Solution is to use [SerDe](https://github.com/rcongiu/Hive-JSON-Serde) .
+Compiling SerDe for Google Cloud must be with CDH4 mvn profile
+```
+sudo apt-get install -y maven openjdk-7-jdk git  && \
+git clone https://github.com/rcongiu/Hive-JSON-Serde.git && \
+cd Hive-JSON-Serde && \
+mvn -Pcdh4 clean package
+```
+
+
 
