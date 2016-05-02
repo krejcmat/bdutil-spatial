@@ -38,9 +38,9 @@ mvn -Pcdh4 clean package
 ```
 
 ##Hive SerDe schema generator
-1)[install scala](http://www.scala-sbt.org/download.html)
+1) [install scala](http://www.scala-sbt.org/download.html)
 
-2)Clone repository with generator
+2) Clone repository of hive schema generator
 ```
 $ git clone https://github.com/strelec/hive-serde-schema-gen.git
 ```
